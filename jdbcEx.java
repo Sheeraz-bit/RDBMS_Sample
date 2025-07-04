@@ -3,10 +3,12 @@ package jdbcdemo;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
  
 public class JDBC_Demo_PostgreSQL {
 private static final String URL="jdbc:postgresql://localhost:5432/mydb";
@@ -40,6 +42,22 @@ public static void insertTblRow(String tblName,Collection<Data> dataCollection,S
 		System.out.println(rowInserted.length+" rows inserted sucessfully into "+tblName);
 	 }
 }//insertTblRow
+ 
+public static List<Data> readAllRows(String tbl,String sql){
+	 List dlist=new ArrayList<>();
+	 try(Connection con =getConnection();
+			 PreparedStatement stm=con.prepareStatement(sql);
+			 ResultSet rs=stm.executeQuery();){
+		
+		 while(rs.next()) {
+			 Data data=new Data(rs.getInt("id"),rs.getString("name"),rs.getInt("age"),rs.getFloat("salary"));
+			 dlist.add(data);
+			  }
+		
+	 }
+	 catch(SQLException e) {e.printStackTrace();}
+	 return dlist;
+}//readAllRows
 	public static void main(String[] args) {
 		String table="empdetails";
 		/*String query="create table if not exists "+table+
@@ -52,12 +70,16 @@ public static void insertTblRow(String tblName,Collection<Data> dataCollection,S
 		dataCollection.add(new Data(3,"Dinesh",30,20000));
 		dataCollection.add(new Data(4,"Priyanka",50,250000));
 		String sql="insert into "+table+" values(?,?,?,?)";
-		try {
+	/*	try {
 			JDBC_Demo_PostgreSQL.insertTblRow(table,dataCollection,sql);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} */
+		
+		String q="select * from "+table;
+		List<Data> emp=readAllRows(table,q);	
+		emp.forEach(System.out::println);
  
 	}
  
